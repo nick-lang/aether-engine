@@ -1,0 +1,49 @@
+{
+  "meta": {
+    "id": "minimal_explorer",
+    "name": "Minimal Explorer",
+    "version": 1
+  },
+  "scenes": [
+    {
+      "id": "main",
+      "name": "Starting Grove"
+    }
+  ],
+  "rooms": [
+    {
+      "id": "starting_grove",
+      "scene": "main",
+      "bounds": { "x": -220, "y": -140, "width": 440, "height": 280 },
+      "label": "Starting Grove"
+    }
+  ],
+  "entities": [
+    {
+      "id": "player",
+      "scene": "main",
+      "components": {
+        "transform": { "x": 0, "y": 0 },
+        "player": { "speed": 220.0 }
+      }
+    },
+    {
+      "id": "grove_shard",
+      "scene": "main",
+      "components": {
+        "transform": { "x": 140, "y": 60 },
+        "collectible": { "id": "grove_shard" }
+      }
+    },
+    {
+      "id": "win",
+      "scene": "main",
+      "components": {
+        "win_condition": { "requires_collectible": "grove_shard" }
+      }
+    }
+  ],
+  "mechanics": [],
+  "content": [],
+  "assets": []
+}

@@ -1,0 +1,16 @@
+[package]
+name = "aether_ecs"
+description = "Entity and component model with Bevy integration"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+aether_core = { workspace = true }
+aether_package = { workspace = true }
+aether_patch = { workspace = true }
+bevy = { workspace = true }
+image = { version = "0.25", default-features = false, features = ["png"] }
+reqwest = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }

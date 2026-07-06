@@ -1,0 +1,1466 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Aether Studio</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        font-family: system-ui, sans-serif;
+        background: #0e1014;
+        color: #e8ecf4;
+        --border: #252b38;
+        --panel: #161a22;
+        --muted: #9aa3b5;
+        --ok: #7dd3a0;
+        --warn: #e8c547;
+        --err: #f07178;
+        --accent: #2b5cff;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+      }
+      .studio {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 1rem 1.25rem 2rem;
+        gap: 1rem;
+      }
+      h1 {
+        font-size: 1.35rem;
+        font-weight: 600;
+        margin: 0;
+      }
+      h2 {
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin: 0 0 0.5rem;
+      }
+      .top-bar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        gap: 0.75rem 1rem;
+      }
+      .top-bar .field {
+        flex: 1 1 180px;
+        min-width: 140px;
+      }
+      .top-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        align-items: center;
+      }
+      .main-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        align-items: start;
+      }
+      @media (max-width: 900px) {
+        .main-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+      .tools-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+      }
+      @media (max-width: 700px) {
+        .tools-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+      .panel {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--panel);
+        padding: 1rem;
+      }
+      .panel-scroll {
+        max-height: 420px;
+        overflow-y: auto;
+      }
+      label {
+        display: block;
+        margin: 0.5rem 0 0.2rem;
+        font-size: 0.8rem;
+        color: var(--muted);
+      }
+      label:first-child {
+        margin-top: 0;
+      }
+      input,
+      button,
+      textarea,
+      select {
+        font: inherit;
+        border-radius: 6px;
+        border: 1px solid #2a3142;
+        background: #0e1014;
+        color: inherit;
+        padding: 0.45rem 0.6rem;
+      }
+      input,
+      textarea,
+      select {
+        width: 100%;
+      }
+      button {
+        cursor: pointer;
+        background: var(--accent);
+        border-color: #3d6bff;
+        white-space: nowrap;
+      }
+      button:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
+      button.secondary {
+        background: #252b38;
+        border-color: #3a4256;
+      }
+      button.danger {
+        background: #5c2b2b;
+        border-color: #7a3a3a;
+      }
+      button.tab {
+        background: #252b38;
+        border-color: #3a4256;
+      }
+      button.tab.active {
+        background: var(--accent);
+        border-color: #3d6bff;
+      }
+      button.sm {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+      }
+      .card-title {
+        font-weight: 600;
+        margin-bottom: 0.35rem;
+      }
+      .candidate {
+        border-top: 1px solid var(--border);
+        padding: 0.65rem 0;
+      }
+      .candidate:first-child {
+        border-top: none;
+        padding-top: 0;
+      }
+      .status-ok {
+        color: var(--ok);
+      }
+      .status-warn {
+        color: var(--warn);
+      }
+      .status-err {
+        color: var(--err);
+      }
+      .muted {
+        font-size: 0.8rem;
+        color: var(--muted);
+      }
+      .req-row {
+        border-top: 1px solid var(--border);
+        padding: 0.6rem 0;
+        font-size: 0.82rem;
+      }
+      .req-row:first-child {
+        border-top: none;
+      }
+      .req-head {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35rem 0.75rem;
+        align-items: baseline;
+      }
+      .req-badge {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        padding: 0.1rem 0.35rem;
+        border-radius: 4px;
+        background: #252b38;
+      }
+      .req-badge.running {
+        background: #3a3520;
+        color: var(--warn);
+      }
+      .trace-block {
+        font-size: 0.72rem;
+        max-height: 200px;
+        overflow: auto;
+        white-space: pre-wrap;
+        word-break: break-word;
+        margin: 0.35rem 0;
+        padding: 0.5rem;
+        background: #0e1014;
+        border-radius: 4px;
+      }
+      .req-trace summary {
+        cursor: pointer;
+        margin-top: 0.35rem;
+      }
+      .req-badge.ok {
+        background: #1a3328;
+        color: var(--ok);
+      }
+      .req-badge.error {
+        background: #3a2020;
+        color: var(--err);
+      }
+      .req-error {
+        margin-top: 0.4rem;
+        padding: 0.5rem;
+        background: #1a1214;
+        border: 1px solid #4a2828;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        white-space: pre-wrap;
+        word-break: break-word;
+        color: #ffb4b4;
+        max-height: 200px;
+        overflow: auto;
+      }
+      .req-preview {
+        margin-top: 0.35rem;
+        max-width: 64px;
+        border-radius: 4px;
+        border: 1px solid var(--border);
+      }
+      .busy-banner {
+        display: none;
+        padding: 0.5rem 0.75rem;
+        background: #3a3520;
+        border: 1px solid #5a5020;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        color: var(--warn);
+      }
+      .busy-banner.visible {
+        display: block;
+      }
+      details pre {
+        font-size: 0.72rem;
+        overflow: auto;
+        max-height: 180px;
+      }
+      #activityLog {
+        font-size: 0.78rem;
+        color: var(--muted);
+        white-space: pre-wrap;
+        max-height: 120px;
+        overflow-y: auto;
+        margin: 0;
+      }
+      .requests-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+      }
+      .manual-submit textarea {
+        min-height: 100px;
+        font-family: ui-monospace, monospace;
+        font-size: 0.75rem;
+      }
+      .panel-primary {
+        border-color: #3d5a9e;
+        background: linear-gradient(180deg, #1a2238 0%, #161a22 100%);
+      }
+      .panel-primary .card-title {
+        color: #a8c4ff;
+      }
+      .world-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 0.75rem;
+      }
+      @media (max-width: 700px) {
+        .world-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="studio">
+      <header>
+        <h1>Aether Studio</h1>
+        <p class="muted" style="margin: 0.35rem 0 0">
+          <strong>Generate game</strong> builds a full playable package (player, win, shards, rooms).
+          Inbox = incremental patches · SD/Ollama art can take 1–3+ min.
+        </p>
+      </header>
+
+      <div class="top-bar panel">
+        <div class="field">
+          <label>Plane URL</label>
+          <input id="planeUrl" value="http://127.0.0.1:8787" />
+        </div>
+        <div class="field">
+          <label>Game ID</label>
+          <input id="gameId" value="minimal_explorer" />
+        </div>
+        <div class="top-actions">
+          <button type="button" id="refresh">Refresh</button>
+          <button type="button" class="secondary" id="loadManifest">Manifest</button>
+          <button type="button" class="secondary" id="checkHealth">Check plane</button>
+          <button type="button" class="secondary" id="checkOllama">Check Ollama</button>
+          <button type="button" class="danger" id="rollback">Rollback</button>
+          <button type="button" class="secondary" id="pruneOrphans" title="Delete PNGs not used by canonical">
+            Prune assets
+          </button>
+          <button
+            type="button"
+            class="secondary"
+            id="pruneAll"
+            title="Orphan PNGs + clear publish history + archived candidates"
+          >
+            Clean workspace
+          </button>
+        </div>
+      </div>
+
+      <div id="busyBanner" class="busy-banner">
+        Generation in progress… Ollama (qwen, etc.) can take several minutes per call;
+        SD often needs 30–180s. Watch <strong>Requests</strong>; do not click again until finished.
+        <span id="busyElapsed"></span>
+        <div id="busyOllama" class="muted" style="margin-top: 0.35rem; font-size: 0.8rem"></div>
+      </div>
+
+      <div class="main-grid">
+        <section class="panel">
+          <div id="manifest" class="muted">Manifest: —</div>
+          <div style="margin-top: 0.65rem">
+            <button type="button" class="tab active" data-view="inbox">Inbox</button>
+            <button type="button" class="tab" data-view="history">History</button>
+          </div>
+          <div id="listPanel" class="panel-scroll" style="margin-top: 0.65rem">
+            Loading…
+          </div>
+        </section>
+
+        <section class="tools-grid">
+          <div
+            class="panel panel-primary"
+            style="grid-column: 1 / -1; border-color: #3d6bff"
+          >
+            <div class="card-title">Generate game (full playable package)</div>
+            <p class="muted" style="margin: 0 0 0.5rem">
+              Replaces canonical with a fresh treasure-hunt style game: player, collectible,
+              win condition, rooms. Applies live — no inbox step. Use this to reset a messy
+              world and prove the pipeline end-to-end.
+            </p>
+            <label>Prompt</label>
+            <input
+              id="gamePrompt"
+              value="Generate a treasure hunt game — collect the golden shard in the north grove"
+            />
+            <div class="world-grid" style="margin-top: 0.5rem">
+              <div>
+                <label>Art mode</label>
+                <select id="gameArtMode">
+                  <option value="stub">Stub (fast)</option>
+                  <option value="automatic1111" selected>A1111 / SD</option>
+                  <option value="ollama">Ollama image</option>
+                </select>
+              </div>
+              <div>
+                <label>Include hero sprite</label>
+                <select id="gameIncludeArt">
+                  <option value="yes" selected>Yes</option>
+                  <option value="no">No</option>
+                </select>
+              </div>
+            </div>
+            <button
+              type="button"
+              id="generateGame"
+              style="margin-top: 0.75rem; width: 100%"
+            >
+              Generate &amp; apply game
+            </button>
+          </div>
+
+          <div class="panel panel-primary" style="grid-column: 1 / -1">
+            <div class="card-title">Generate world (patch + art)</div>
+            <p class="muted" style="margin: 0 0 0.5rem">
+              One prompt → patch (room/shard/…) + sprite when the prompt mentions visuals.
+              One inbox item, one publish.
+            </p>
+            <label>Prompt</label>
+            <input
+              id="worldPrompt"
+              value="Add a goblin camp to the east with a goblin sprite"
+            />
+            <div class="world-grid" style="margin-top: 0.5rem">
+              <div>
+                <label>Patch mode</label>
+                <select id="worldPatchMode">
+                  <option value="simulated">Simulated</option>
+                  <option value="ollama" selected>Ollama (plan)</option>
+                  <option value="openai">OpenAI</option>
+                </select>
+              </div>
+              <div>
+                <label>Art mode</label>
+                <select id="worldArtMode">
+                  <option value="stub">Stub</option>
+                  <option value="automatic1111" selected>A1111 / SD</option>
+                  <option value="ollama">Ollama image</option>
+                </select>
+              </div>
+              <div>
+                <label>Art</label>
+                <select id="worldIncludeArt">
+                  <option value="auto" selected>Auto (visual keywords)</option>
+                  <option value="yes">Always include art</option>
+                  <option value="no">Patch only</option>
+                </select>
+              </div>
+            </div>
+            <label>Placement</label>
+            <select id="worldPlacement">
+              <option value="keywords" selected>Keywords (fast)</option>
+              <option value="auto">Auto</option>
+              <option value="ollama">Ollama coords</option>
+            </select>
+            <button
+              type="button"
+              id="generateWorld"
+              style="margin-top: 0.75rem; width: 100%"
+            >
+              Generate world candidate
+            </button>
+          </div>
+
+          <div class="panel">
+            <div class="card-title">Generate patch only</div>
+            <label>Mode</label>
+            <select id="genMode">
+              <option value="simulated">Simulated (keywords)</option>
+              <option value="ollama">Ollama (plan → patch)</option>
+              <option value="dream" selected>Dream (Ollama full patch)</option>
+              <option value="openai">OpenAI (full patch)</option>
+            </select>
+            <p class="muted" style="margin: 0.35rem 0 0; font-size: 0.75rem">
+              <strong>Dream</strong> — model writes the whole patch (rooms, props, floors).
+              <strong>Plan</strong> — small JSON + Rust layout (predictable). Set
+              <code>OLLAMA_MODEL</code> in .env; large models need
+              <code>OLLAMA_TIMEOUT_SECS=300</code>.
+            </p>
+            <label>Prompt</label>
+            <input
+              id="genPrompt"
+              value="A flooded stone archive north of the grove, moss floors, and a hidden amber shard inside"
+            />
+            <button type="button" id="generatePatch" style="margin-top: 0.6rem; width: 100%">
+              Generate patch
+            </button>
+          </div>
+
+          <div class="panel">
+            <div class="card-title">Generate art only</div>
+            <label>Image mode</label>
+            <select id="artMode">
+              <option value="stub">Stub</option>
+              <option value="ollama">Ollama image</option>
+              <option value="automatic1111" selected>A1111 / SD WebUI</option>
+            </select>
+            <label>Placement</label>
+            <select id="artPlacement">
+              <option value="auto" selected>Auto (Ollama if set)</option>
+              <option value="ollama">Ollama coords</option>
+              <option value="keywords">Keywords</option>
+            </select>
+            <label>Prompt</label>
+            <input id="artPrompt" value="rustic chest sprite to the east" />
+            <button type="button" id="generateArt" style="margin-top: 0.6rem; width: 100%">
+              Generate art
+            </button>
+          </div>
+
+          <div class="panel manual-submit" style="grid-column: 1 / -1">
+            <div class="card-title">Manual submit</div>
+            <textarea id="patchJson" rows="8"></textarea>
+            <button type="button" id="submitPatch" style="margin-top: 0.5rem">
+              Submit candidate
+            </button>
+          </div>
+        </section>
+      </div>
+
+      <section class="panel">
+        <div class="requests-header">
+          <h2 style="margin: 0">Saved traces</h2>
+          <div>
+            <button type="button" class="secondary sm" id="refreshTraces">Refresh</button>
+          </div>
+        </div>
+        <div id="traceHistory" class="panel-scroll" style="max-height: 220px">
+          <p class="muted">Persisted LLM traces from <code>/traces</code> (survives reload).</p>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="requests-header">
+          <h2 style="margin: 0">Requests</h2>
+          <div>
+            <button type="button" class="secondary sm" id="clearRequests">Clear</button>
+          </div>
+        </div>
+        <div id="requestList" class="panel-scroll" style="max-height: 280px">
+          <p class="muted">No requests yet. Generate patch or art to see status and errors here.</p>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2 style="margin: 0 0 0.35rem">Activity</h2>
+        <pre id="activityLog"></pre>
+      </section>
+    </div>
+
+    <script>
+      const $ = (id) => document.getElementById(id);
+      const REQUESTS_KEY = "aether_studio_requests";
+
+      const requests = loadRequests();
+      let activeView = "inbox";
+      let busyTimer = null;
+      let ollamaPollTimer = null;
+      let lastOllamaActivity = "";
+
+      function loadRequests() {
+        try {
+          const raw = sessionStorage.getItem(REQUESTS_KEY);
+          return raw ? JSON.parse(raw) : [];
+        } catch {
+          return [];
+        }
+      }
+
+      function saveRequests() {
+        sessionStorage.setItem(REQUESTS_KEY, JSON.stringify(requests.slice(0, 40)));
+      }
+
+      function logActivity(msg) {
+        const line = `[${new Date().toLocaleTimeString()}] ${msg}`;
+        $("activityLog").textContent = line + "\n" + $("activityLog").textContent;
+      }
+
+      async function errorText(res) {
+        const text = await res.text();
+        try {
+          const j = JSON.parse(text);
+          return j.error || text;
+        } catch {
+          return text || res.statusText || `HTTP ${res.status}`;
+        }
+      }
+
+      function formatDuration(ms) {
+        if (ms < 1000) return `${ms}ms`;
+        return `${(ms / 1000).toFixed(1)}s`;
+      }
+
+      function escapeHtml(s) {
+        return String(s)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;");
+      }
+
+      function isSdError(msg) {
+        return /automatic1111|a1111|sd webui|txt2img/i.test(msg);
+      }
+
+      function startRequest({ kind, prompt, mode, extra }) {
+        const entry = {
+          id: Date.now().toString(16) + Math.random().toString(16).slice(2, 6),
+          kind,
+          prompt,
+          mode,
+          extra: extra || "",
+          status: "running",
+          started: Date.now(),
+          ended: null,
+          error: null,
+          result: null,
+          assetPreview: null,
+        };
+        requests.unshift(entry);
+        saveRequests();
+        renderRequests();
+        updateBusyUi();
+        return entry;
+      }
+
+      function finishRequest(entry, ok, result, errorMsg) {
+        entry.status = ok ? "ok" : "error";
+        entry.ended = Date.now();
+        entry.result = result || null;
+        entry.error = errorMsg || null;
+        if (ok && result?.asset_id) {
+          entry.assetPreview = `${base()}/packages/${gameId()}/assets/${result.asset_id}?t=${entry.ended}`;
+        }
+        saveRequests();
+        renderRequests();
+        updateBusyUi();
+      }
+
+      function anyRunning() {
+        return requests.some((r) => r.status === "running");
+      }
+
+      function requestUsesOllama(r) {
+        if (r.status !== "running") return false;
+        const mode = (r.mode || "").toLowerCase();
+        const extra = (r.extra || "").toLowerCase();
+        if (mode.includes("ollama")) return true;
+        if (extra === "ollama" || extra === "auto") return r.kind === "art" || r.kind === "world";
+        if (r.kind === "world" && extra !== "no") return mode.includes("ollama") || extra === "auto";
+        return false;
+      }
+
+      function anyRunningUsesOllama() {
+        return requests.some(requestUsesOllama);
+      }
+
+      async function pollOllamaActivity() {
+        if (!anyRunningUsesOllama()) return;
+        try {
+          const res = await fetch(`${base()}/health/ollama/activity`);
+          const body = await res.json();
+          const label =
+            body.state === "running"
+              ? `● Ollama: generating (${body.configured_model})`
+              : body.state === "loading"
+                ? `◐ Ollama: model loading (${(body.running_models || []).join(", ") || "…"})`
+                : body.state === "idle"
+                  ? `○ Ollama: waiting — ${body.message}`
+                  : `✕ ${body.message}`;
+          lastOllamaActivity = label;
+          $("busyOllama").textContent = label;
+          requests
+            .filter((r) => r.status === "running" && requestUsesOllama(r))
+            .forEach((r) => {
+              r.ollamaStatus = body.message;
+            });
+          renderRequests();
+        } catch (e) {
+          $("busyOllama").textContent = `✕ Ollama activity poll failed: ${e.message}`;
+        }
+      }
+
+      function stopOllamaPoll() {
+        if (ollamaPollTimer) {
+          clearInterval(ollamaPollTimer);
+          ollamaPollTimer = null;
+        }
+        $("busyOllama").textContent = "";
+        lastOllamaActivity = "";
+      }
+
+      function updateBusyUi() {
+        const running = requests.filter((r) => r.status === "running");
+        const busy = running.length > 0;
+        $("generatePatch").disabled = busy;
+        $("generateArt").disabled = busy;
+        $("generateWorld").disabled = busy;
+        $("generateGame").disabled = busy;
+        $("busyBanner").classList.toggle("visible", busy);
+        if (busy) {
+          const oldest = running.reduce((a, b) => (a.started < b.started ? a : b));
+          const sec = Math.floor((Date.now() - oldest.started) / 1000);
+          $("busyElapsed").textContent = ` (${sec}s)`;
+          if (!busyTimer) {
+            busyTimer = setInterval(() => {
+              if (!anyRunning()) {
+                clearInterval(busyTimer);
+                busyTimer = null;
+                stopOllamaPoll();
+                updateBusyUi();
+                return;
+              }
+              const o = requests
+                .filter((r) => r.status === "running")
+                .reduce((a, b) => (a.started < b.started ? a : b));
+              $("busyElapsed").textContent = ` (${Math.floor((Date.now() - o.started) / 1000)}s)`;
+              renderRequests();
+            }, 1000);
+          }
+          if (anyRunningUsesOllama() && !ollamaPollTimer) {
+            pollOllamaActivity();
+            ollamaPollTimer = setInterval(pollOllamaActivity, 2000);
+          }
+        } else {
+          if (busyTimer) {
+            clearInterval(busyTimer);
+            busyTimer = null;
+          }
+          stopOllamaPoll();
+          $("busyElapsed").textContent = "";
+        }
+      }
+
+      function renderRequests() {
+        const el = $("requestList");
+        if (!requests.length) {
+          el.innerHTML =
+            '<p class="muted">No requests yet. Generate patch or art to see status and errors here.</p>';
+          return;
+        }
+        el.innerHTML = requests
+          .map((r) => {
+            const dur =
+              r.ended != null
+                ? formatDuration(r.ended - r.started)
+                : formatDuration(Date.now() - r.started) + "…";
+            const badgeClass = r.status;
+            let resultLine = "";
+            if (r.status === "ok" && r.result) {
+              if (r.kind === "world") {
+                resultLine = `<div class="muted">→ ${escapeHtml(r.result.patch_id || "")} · patch ${escapeHtml(r.result.patch_provider || "")}${r.result.art_included ? ` · art ${escapeHtml(r.result.asset_id || "")} (${escapeHtml(r.result.art_provider || "")})` : " · no art"}</div>`;
+                if (r.assetPreview) {
+                  resultLine += `<img class="req-preview" src="${escapeHtml(r.assetPreview)}" alt="asset" />`;
+                }
+                if (r.result.trace) {
+                  const t = r.result.trace;
+                  resultLine += `<details class="req-trace"><summary class="muted">LLM trace (patch)</summary>
+                    <pre class="trace-block">${escapeHtml(t.raw_model_text || "")}</pre>
+                  </details>`;
+                }
+              } else if (r.kind === "art") {
+                resultLine = `<div class="muted">→ ${escapeHtml(r.result.asset_id || "")} · placement ${escapeHtml(r.result.placement || "")} · ${escapeHtml(r.result.patch_id || "")}</div>`;
+                if (r.assetPreview) {
+                  resultLine += `<img class="req-preview" src="${escapeHtml(r.assetPreview)}" alt="asset" />`;
+                }
+              } else {
+                resultLine = `<div class="muted">→ ${escapeHtml(r.result.patch_id || "")} (${escapeHtml(r.result.provider || "")})</div>`;
+              }
+              if (r.result.trace) {
+                const t = r.result.trace;
+                const notes =
+                  (t.validation_notes || []).length > 0
+                    ? `<div class="muted">Validation: ${escapeHtml(t.validation_notes.join("; "))}</div>`
+                    : "";
+                resultLine += `<details class="req-trace"><summary class="muted">LLM trace (${escapeHtml(t.provider)}${t.model ? " · " + escapeHtml(t.model) : ""}${t.built_summary ? " · built " + escapeHtml(t.built_summary) : ""})</summary>
+                  <p class="muted" style="margin:0.25rem 0;font-size:0.75rem">Raw plan JSON from the model (not the patch sent to inbox):</p>
+                  <pre class="trace-block">${escapeHtml(t.raw_model_text || "")}</pre>
+                  ${notes}
+                  ${t.parse_error ? `<div class="req-error">Parse: ${escapeHtml(t.parse_error)}</div>` : ""}
+                </details>`;
+              }
+            }
+            let errBlock = "";
+            if (r.status === "error" && r.error) {
+              const label = isSdError(r.error) ? "Stable Diffusion / A1111 error" : "Error";
+              errBlock = `<div class="req-error"><strong>${label}</strong>\n${escapeHtml(r.error)}</div>`;
+            }
+            return `
+          <div class="req-row">
+            <div class="req-head">
+              <span class="req-badge ${badgeClass}">${r.status}</span>
+              <strong>${escapeHtml(r.kind)}</strong>
+              <span class="muted">${escapeHtml(r.mode)}${r.extra ? " · " + escapeHtml(r.extra) : ""}</span>
+              <span class="muted">${dur}</span>
+            </div>
+            <div class="muted">${escapeHtml(r.prompt)}</div>
+            ${
+              r.status === "running" && r.ollamaStatus
+                ? `<div class="muted" style="color: var(--warn)">${escapeHtml(r.ollamaStatus)}</div>`
+                : ""
+            }
+            ${resultLine}
+            ${errBlock}
+          </div>`;
+          })
+          .join("");
+      }
+
+      async function trackedFetch(entry, url, options) {
+        const res = await fetch(url, options);
+        if (!res.ok) {
+          const msg = await errorText(res);
+          throw new Error(msg);
+        }
+        return res.json();
+      }
+
+      const base = () => $("planeUrl").value.replace(/\/$/, "");
+      const gameId = () => $("gameId").value.trim();
+
+      async function loadManifest() {
+        const res = await fetch(`${base()}/packages/${gameId()}/manifest`);
+        if (!res.ok) throw new Error(await res.text());
+        const m = await res.json();
+        const active =
+          m.active_patches?.length > 0
+            ? ` · active: ${m.active_patches.join(", ")}`
+            : " · active: (none)";
+        $("manifest").textContent = `Manifest: ${m.package_id} v${m.package_version} · event seq ${m.published_sequence}${active}`;
+        return m;
+      }
+
+      async function loadTraceHistory() {
+        const el = $("traceHistory");
+        try {
+          const res = await fetch(`${base()}/packages/${gameId()}/traces`);
+          if (!res.ok) throw new Error(await res.text());
+          const body = await res.json();
+          const traces = body.traces || [];
+          if (!traces.length) {
+            el.innerHTML =
+              '<p class="muted">No saved traces yet — generate with Ollama/Dream to persist.</p>';
+            return;
+          }
+          el.innerHTML = traces
+            .map((t) => {
+              const trace = t.trace || {};
+              const notes = (trace.validation_notes || [])
+                .map((n) => `<li>${escapeHtml(n)}</li>`)
+                .join("");
+              const parseErr = trace.parse_error
+                ? `<p class="err">${escapeHtml(trace.parse_error)}</p>`
+                : "";
+              const when = t.saved_at_ms
+                ? new Date(t.saved_at_ms).toLocaleString()
+                : "—";
+              return `<div class="req-item" style="margin-bottom: 0.65rem">
+                <div><strong>${escapeHtml(t.patch_id || "?")}</strong>
+                  <span class="muted"> · ${escapeHtml(t.provider || trace.provider || "?")} · ${escapeHtml(when)}</span></div>
+                <div class="muted" style="font-size: 0.85rem">${escapeHtml(t.prompt || trace.user_message || "")}</div>
+                ${parseErr}
+                ${notes ? `<ul class="muted" style="margin: 0.25rem 0 0 1rem">${notes}</ul>` : ""}
+                <details class="req-trace"><summary class="muted">raw model text</summary>
+                  <pre class="trace-block">${escapeHtml(trace.raw_model_text || "")}</pre>
+                </details>
+              </div>`;
+            })
+            .join("");
+        } catch (e) {
+          el.innerHTML = `<p class="err">${escapeHtml(e.message)}</p>`;
+        }
+      }
+
+      function opSummary(patch) {
+        return (patch.ops || [])
+          .map((o) => o.op)
+          .filter(Boolean)
+          .join(", ");
+      }
+
+      async function loadInbox() {
+        const res = await fetch(
+          `${base()}/packages/${gameId()}/candidates?status=pending`
+        );
+        if (!res.ok) throw new Error(await res.text());
+        const list = await res.json();
+        if (!list.length) {
+          $("listPanel").innerHTML =
+            '<p class="muted">Inbox empty — generate or submit a patch, then Publish.</p>';
+          return;
+        }
+        $("listPanel").innerHTML = list
+          .map(
+            (c) => `
+          <div class="candidate">
+            <strong>${escapeHtml(c.patch_id)}</strong>
+            <span class="status-ok">pending</span>
+            <span class="muted"> · ${escapeHtml(opSummary(c.patch))}</span>
+            <details>
+              <summary class="muted">Patch JSON</summary>
+              <pre>${escapeHtml(JSON.stringify(c.patch, null, 2))}</pre>
+            </details>
+            <button data-publish="${escapeHtml(c.patch_id)}">Publish</button>
+            <button class="danger" data-reject="${escapeHtml(c.patch_id)}">Reject</button>
+          </div>`
+          )
+          .join("");
+
+        $("listPanel").querySelectorAll("[data-publish]").forEach((btn) => {
+          btn.onclick = () => publish(btn.dataset.publish);
+        });
+        $("listPanel").querySelectorAll("[data-reject]").forEach((btn) => {
+          btn.onclick = () => reject(btn.dataset.reject);
+        });
+      }
+
+      async function loadHistory() {
+        const [patchRes, manifestRes] = await Promise.all([
+          fetch(`${base()}/packages/${gameId()}/patches?since=0`),
+          fetch(`${base()}/packages/${gameId()}/manifest`),
+        ]);
+        if (!patchRes.ok) throw new Error(await patchRes.text());
+        const list = await patchRes.json();
+        const manifest = manifestRes.ok ? await manifestRes.json() : {};
+        const active = new Set(manifest.active_patches || []);
+        const labels = manifest.patch_labels || {};
+        const recent = list.slice(-12).reverse();
+        if (!recent.length) {
+          $("listPanel").innerHTML = '<p class="muted">No publishes yet.</p>';
+          return;
+        }
+        $("listPanel").innerHTML =
+          '<p class="muted">Audit log (newest first). Rolling back a room also removes dependent tile patches. Rename keeps the same patch id for re-apply.</p>' +
+          recent
+            .map((p) => {
+              const id = p.patch.patch_id;
+              const label = p.label || labels[id] || "";
+              const title = label
+                ? `${escapeHtml(label)} <span class="muted">(${escapeHtml(id)})</span>`
+                : escapeHtml(id);
+              const isActive = active.has(id);
+              return `
+          <div class="candidate">
+            <strong>#${p.sequence}</strong>
+            <span class="${isActive ? "status-ok" : "muted"}">${title}</span>
+            ${isActive ? "" : '<span class="muted"> · rolled back</span>'}
+            <span class="muted"> · ${escapeHtml(opSummary(p.patch))}</span>
+            <button type="button" data-rename="${escapeHtml(id)}">Rename</button>
+            ${
+              isActive
+                ? `<button class="danger" data-rollback="${escapeHtml(id)}">Rollback</button>`
+                : `<button data-reactivate="${escapeHtml(id)}">Re-apply</button>
+                   <button class="danger" data-delete="${escapeHtml(id)}">Delete</button>`
+            }
+            <details>
+              <summary class="muted">Patch JSON</summary>
+              <pre>${escapeHtml(JSON.stringify(p.patch, null, 2))}</pre>
+            </details>
+          </div>`;
+            })
+            .join("");
+        $("listPanel").querySelectorAll("[data-rollback]").forEach((btn) => {
+          btn.onclick = () =>
+            rollbackPatch(btn.dataset.rollback).catch((e) =>
+              logActivity(e.message)
+            );
+        });
+        $("listPanel").querySelectorAll("[data-reactivate]").forEach((btn) => {
+          btn.onclick = () =>
+            reactivatePatch(btn.dataset.reactivate).catch((e) =>
+              logActivity(e.message)
+            );
+        });
+        $("listPanel").querySelectorAll("[data-delete]").forEach((btn) => {
+          btn.onclick = () =>
+            deletePatch(btn.dataset.delete).catch((e) =>
+              logActivity(e.message)
+            );
+        });
+        $("listPanel").querySelectorAll("[data-rename]").forEach((btn) => {
+          btn.onclick = () =>
+            renamePatch(btn.dataset.rename).catch((e) =>
+              logActivity(e.message)
+            );
+        });
+      }
+
+      async function loadListPanel() {
+        if (activeView === "inbox") await loadInbox();
+        else await loadHistory();
+      }
+
+      async function publish(patchId) {
+        const res = await fetch(
+          `${base()}/packages/${gameId()}/candidates/${patchId}/publish`,
+          { method: "POST" }
+        );
+        if (!res.ok) throw new Error(await errorText(res));
+        logActivity(`Published ${patchId}`);
+        await refresh();
+      }
+
+      async function reject(patchId) {
+        const res = await fetch(
+          `${base()}/packages/${gameId()}/candidates/${patchId}/reject`,
+          { method: "POST" }
+        );
+        if (!res.ok) throw new Error(await errorText(res));
+        logActivity(`Rejected ${patchId}`);
+        await refresh();
+      }
+
+      function includeArtBody(value) {
+        if (value === "yes") return true;
+        if (value === "no") return false;
+        return null;
+      }
+
+      async function generateGame() {
+        if (anyRunning()) return;
+        const prompt = $("gamePrompt").value;
+        const art_mode = $("gameArtMode").value;
+        const include_art = includeArtBody($("gameIncludeArt").value);
+        const entry = startRequest({
+          kind: "game",
+          prompt,
+          mode: art_mode,
+          extra: $("gameIncludeArt").value,
+        });
+        try {
+          const body = await trackedFetch(
+            entry,
+            `${base()}/packages/${gameId()}/generate-game`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                prompt,
+                patch_mode: "simulated",
+                art_mode,
+                placement: "keywords",
+                include_art,
+                apply_canonical: true,
+              }),
+            }
+          );
+          finishRequest(
+            entry,
+            true,
+            {
+              patch_id: body.patch?.patch_id,
+              applied: body.applied,
+              title: body.plan_summary?.title,
+              collectibles: body.plan_summary?.collectible_count,
+              asset_id: body.asset_id,
+            },
+            null
+          );
+          if (body.asset_id) {
+            entry.assetPreview = `${base()}/packages/${gameId()}/assets/${body.asset_id}?t=${Date.now()}`;
+            saveRequests();
+            renderRequests();
+          }
+          $("patchJson").value = JSON.stringify(body.patch, null, 2);
+          logActivity(
+            `Game applied: ${body.plan_summary?.title} — ${body.plan_summary?.collectible_count} collectible(s), win=${body.plan_summary?.win_collectible_id}${body.asset_id ? `, art ${body.asset_id}` : ""}`
+          );
+          activeView = "history";
+          setActiveTab("history");
+          await refresh();
+        } catch (e) {
+          finishRequest(entry, false, null, e.message);
+          logActivity(`Game failed: ${e.message}`);
+          throw e;
+        }
+      }
+
+      async function generateWorld() {
+        if (anyRunning()) return;
+        const prompt = $("worldPrompt").value;
+        const patch_mode = $("worldPatchMode").value;
+        const art_mode = $("worldArtMode").value;
+        const placement = $("worldPlacement").value;
+        const includeArt = includeArtBody($("worldIncludeArt").value);
+        const entry = startRequest({
+          kind: "world",
+          prompt,
+          mode: `${patch_mode}+${art_mode}`,
+          extra: $("worldIncludeArt").value,
+        });
+        try {
+          const body = await trackedFetch(
+            entry,
+            `${base()}/packages/${gameId()}/generate-world`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                prompt,
+                patch_mode,
+                art_mode,
+                placement,
+                include_art: includeArt,
+                auto_submit: true,
+              }),
+            }
+          );
+          finishRequest(
+            entry,
+            true,
+            {
+              patch_id: body.patch?.patch_id,
+              patch_provider: body.patch_provider,
+              asset_id: body.asset_id,
+              art_provider: body.art_provider,
+              placement: body.placement,
+              art_included: body.art_included,
+              trace: body.trace,
+            },
+            null
+          );
+          if (body.asset_id) {
+            entry.assetPreview = `${base()}/packages/${gameId()}/assets/${body.asset_id}?t=${Date.now()}`;
+            saveRequests();
+            renderRequests();
+          }
+          $("patchJson").value = JSON.stringify(body.patch, null, 2);
+          const traceNote = body.trace?.validation_notes?.length
+            ? ` · ${body.trace.validation_notes.join("; ")}`
+            : "";
+          logActivity(
+            `World OK: ${body.patch.patch_id} (${body.patch_provider}${body.art_included ? ` + art ${body.asset_id}` : ""}${traceNote})`
+          );
+          activeView = "inbox";
+          setActiveTab("inbox");
+          await refresh();
+        } catch (e) {
+          finishRequest(entry, false, null, e.message);
+          logActivity(`World failed: ${e.message}`);
+          throw e;
+        }
+      }
+
+      async function generatePatch() {
+        if (anyRunning()) return;
+        const prompt = $("genPrompt").value;
+        const mode = $("genMode").value;
+        const entry = startRequest({ kind: "patch", prompt, mode });
+        try {
+          const body = await trackedFetch(
+            entry,
+            `${base()}/packages/${gameId()}/generate`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ prompt, mode, auto_submit: true }),
+            }
+          );
+          finishRequest(
+            entry,
+            true,
+            {
+              patch_id: body.patch?.patch_id,
+              provider: body.provider,
+              trace: body.trace,
+            },
+            null
+          );
+          $("patchJson").value = JSON.stringify(body.patch, null, 2);
+          logActivity(`Patch OK: ${body.patch.patch_id} (${body.provider})`);
+          activeView = "inbox";
+          setActiveTab("inbox");
+          await refresh();
+        } catch (e) {
+          finishRequest(entry, false, null, e.message);
+          logActivity(`Patch failed: ${e.message}`);
+          throw e;
+        }
+      }
+
+      async function generateArt() {
+        if (anyRunning()) return;
+        const prompt = $("artPrompt").value;
+        const mode = $("artMode").value;
+        const placement = $("artPlacement").value;
+        const entry = startRequest({
+          kind: "art",
+          prompt,
+          mode,
+          extra: placement,
+        });
+        try {
+          const body = await trackedFetch(
+            entry,
+            `${base()}/packages/${gameId()}/generate-art`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                prompt,
+                mode,
+                placement,
+                entity_id: `art_prop_${Date.now().toString(16)}`,
+                scene: "main",
+                auto_submit: true,
+              }),
+            }
+          );
+          finishRequest(
+            entry,
+            true,
+            {
+              asset_id: body.asset_id,
+              placement: body.placement,
+              patch_id: body.patch?.patch_id,
+            },
+            null
+          );
+          $("patchJson").value = JSON.stringify(body.patch, null, 2);
+          logActivity(
+            `Art OK: ${body.asset_id} (${body.provider}, ${body.placement})`
+          );
+          activeView = "inbox";
+          setActiveTab("inbox");
+          await refresh();
+        } catch (e) {
+          finishRequest(entry, false, null, e.message);
+          logActivity(`Art failed: ${e.message}`);
+          throw e;
+        }
+      }
+
+      async function rollbackPatch(patchId) {
+        const res = await fetch(`${base()}/packages/${gameId()}/rollback`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(patchId ? { patch_id: patchId } : {}),
+        });
+        if (!res.ok) throw new Error(await errorText(res));
+        const body = await res.json();
+        logActivity(body.message || "Rolled back (orphan assets pruned)");
+        await refresh();
+      }
+
+      async function reactivatePatch(patchId) {
+        const res = await fetch(
+          `${base()}/packages/${gameId()}/patches/${encodeURIComponent(patchId)}/reactivate`,
+          { method: "POST" }
+        );
+        if (!res.ok) throw new Error(await errorText(res));
+        const body = await res.json();
+        logActivity(body.message || `Re-applied ${patchId}`);
+        await refresh();
+      }
+
+      async function deletePatch(patchId) {
+        if (
+          !confirm(
+            `Delete patch "${patchId}" from history and prune its orphan assets?`
+          )
+        ) {
+          return;
+        }
+        const res = await fetch(
+          `${base()}/packages/${gameId()}/patches/${encodeURIComponent(patchId)}`,
+          { method: "DELETE" }
+        );
+        if (!res.ok) throw new Error(await errorText(res));
+        const body = await res.json();
+        const n = body.assets_removed?.length || 0;
+        logActivity(
+          `Deleted ${patchId}${n ? `; pruned ${n} asset(s)` : ""}`
+        );
+        await refresh();
+      }
+
+      async function renamePatch(patchId) {
+        const current =
+          (await fetch(`${base()}/packages/${gameId()}/manifest`).then((r) =>
+            r.ok ? r.json() : {}
+          )).patch_labels?.[patchId] || "";
+        const label = prompt("Display name for this patch:", current);
+        if (label === null) return;
+        const res = await fetch(
+          `${base()}/packages/${gameId()}/patches/${encodeURIComponent(patchId)}/label`,
+          {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ label }),
+          }
+        );
+        if (!res.ok) throw new Error(await errorText(res));
+        logActivity(label.trim() ? `Renamed to "${label.trim()}"` : "Label cleared");
+        await loadHistory();
+      }
+
+      async function pruneWorkspace(body) {
+        const res = await fetch(`${base()}/packages/${gameId()}/prune`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        if (!res.ok) throw new Error(await errorText(res));
+        return res.json();
+      }
+
+      async function pruneOrphansOnly() {
+        const r = await pruneWorkspace({ orphan_assets: true });
+        logActivity(
+          `Pruned ${r.assets_removed?.length || 0} orphan PNG(s)${r.assets_removed?.length ? ": " + r.assets_removed.join(", ") : ""}`
+        );
+      }
+
+      async function cleanWorkspace() {
+        if (
+          !confirm(
+            "Clean workspace? Removes orphan PNGs, all History publishes, and archived candidate JSON. Canonical world is kept."
+          )
+        ) {
+          return;
+        }
+        const r = await pruneWorkspace({
+          orphan_assets: true,
+          clear_archived_candidates: true,
+          clear_publish_history: true,
+          clear_pending_candidates: true,
+        });
+        logActivity(
+          `Cleaned: ${r.assets_removed?.length || 0} PNG, ${r.published_records_removed || 0} history, ${r.archived_candidates_removed || 0} archived`
+        );
+        activeView = "history";
+        setActiveTab("history");
+        await refresh();
+      }
+
+      async function checkHealth() {
+        const entry = startRequest({
+          kind: "health",
+          prompt: "GET /health",
+          mode: "plane",
+        });
+        try {
+          const res = await fetch(`${base()}/health`);
+          if (!res.ok) throw new Error(await res.text());
+          const text = await res.text();
+          finishRequest(entry, true, { patch_id: text.trim() }, null);
+          logActivity(`Plane OK: ${text.trim()}`);
+        } catch (e) {
+          finishRequest(entry, false, null, e.message);
+          logActivity(`Plane unreachable: ${e.message}`);
+        }
+      }
+
+      async function checkOllama() {
+        const entry = startRequest({
+          kind: "health",
+          prompt: "GET /health/ollama",
+          mode: "ollama",
+        });
+        try {
+          const res = await fetch(`${base()}/health/ollama`);
+          const body = await res.json();
+          if (!body.ok) {
+            throw new Error(body.message || "Ollama health check failed");
+          }
+          finishRequest(
+            entry,
+            true,
+            {
+              patch_id: body.configured_model,
+              patch_provider: `timeout ${body.timeout_secs}s`,
+            },
+            null
+          );
+          logActivity(
+            `Ollama OK: ${body.configured_model} (models: ${(body.models || []).join(", ")})`
+          );
+        } catch (e) {
+          finishRequest(entry, false, null, e.message);
+          logActivity(`Ollama check failed: ${e.message}`);
+        }
+      }
+
+      async function submitPatch() {
+        const patch = JSON.parse($("patchJson").value);
+        const res = await fetch(`${base()}/packages/${gameId()}/candidates`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(patch),
+        });
+        if (!res.ok) throw new Error(await errorText(res));
+        logActivity(`Submitted ${patch.patch_id}`);
+        activeView = "inbox";
+        setActiveTab("inbox");
+        await refresh();
+      }
+
+      function setActiveTab(view) {
+        document.querySelectorAll("button.tab").forEach((btn) => {
+          btn.classList.toggle("active", btn.dataset.view === view);
+        });
+      }
+
+      async function refresh() {
+        await loadManifest();
+        await loadListPanel();
+        await loadTraceHistory();
+      }
+
+      document.querySelectorAll("button.tab").forEach((btn) => {
+        btn.onclick = () => {
+          activeView = btn.dataset.view;
+          setActiveTab(activeView);
+          loadListPanel().catch((e) => logActivity(e.message));
+        };
+      });
+
+      $("refresh").onclick = () => refresh().catch((e) => logActivity(e.message));
+      $("refreshTraces").onclick = () =>
+        loadTraceHistory().catch((e) => logActivity(e.message));
+      $("loadManifest").onclick = () =>
+        loadManifest().catch((e) => logActivity(e.message));
+      $("checkHealth").onclick = () => checkHealth();
+      $("checkOllama").onclick = () => checkOllama();
+      $("clearRequests").onclick = () => {
+        requests.length = 0;
+        saveRequests();
+        renderRequests();
+        updateBusyUi();
+      };
+      $("generateGame").onclick = () => generateGame().catch(() => {});
+      $("generateWorld").onclick = () => generateWorld().catch(() => {});
+      $("generatePatch").onclick = () =>
+        generatePatch().catch(() => {});
+      $("generateArt").onclick = () => generateArt().catch(() => {});
+      $("rollback").onclick = () =>
+        rollbackPatch(null).catch((e) => logActivity(e.message));
+      $("pruneOrphans").onclick = () =>
+        pruneOrphansOnly().catch((e) => logActivity(e.message));
+      $("pruneAll").onclick = () => cleanWorkspace().catch((e) => logActivity(e.message));
+      $("submitPatch").onclick = () => submitPatch().catch((e) => logActivity(e.message));
+
+      $("patchJson").value = JSON.stringify(
+        {
+          patch_id: "add_north_room",
+          base_version: 1,
+          ops: [
+            {
+              op: "upsert_room",
+              scene: "main",
+              room: {
+                id: "north_grove",
+                scene: "main",
+                bounds: { x: -180, y: 130, width: 360, height: 100 },
+                label: "North Grove",
+              },
+            },
+          ],
+        },
+        null,
+        2
+      );
+
+      renderRequests();
+      updateBusyUi();
+      if (requests.some((r) => r.status === "running")) {
+        requests.forEach((r) => {
+          if (r.status === "running") {
+            r.status = "error";
+            r.error =
+              "Studio was reloaded while this request was still running. Check plane terminal or try again.";
+            r.ended = Date.now();
+          }
+        });
+        saveRequests();
+        renderRequests();
+        updateBusyUi();
+      }
+      refresh().catch((e) => logActivity(e.message));
+    </script>
+  </body>
+</html>

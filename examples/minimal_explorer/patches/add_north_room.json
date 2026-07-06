@@ -1,0 +1,16 @@
+{
+  "patch_id": "add_north_room",
+  "base_version": 1,
+  "ops": [
+    {
+      "op": "upsert_room",
+      "scene": "main",
+      "room": {
+        "id": "north_grove",
+        "scene": "main",
+        "bounds": { "x": -220, "y": 140, "width": 440, "height": 100 },
+        "label": "North Grove"
+      }
+    }
+  ]
+}

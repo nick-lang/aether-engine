@@ -1,0 +1,34 @@
+---
+description: Aether Engine conventions — plans, architecture, scope
+alwaysApply: true
+---
+
+# Aether Engine
+
+## Plans
+
+- **Implement from:** `.cursor/plans/aether_engine_near_term.plan.md`
+- **Vision check:** `.cursor/plans/aether_engine_grand_design.plan.md`
+- **Phase index:** `.cursor/plans/aether_engine_roadmap.plan.md`
+- **Agent workflow:** `AGENTS.md` at repo root
+- **Autonomous test loop:** `.cursor/skills/aether-autoplay/SKILL.md`, `docs/agent-autoplay.md`
+- **Continuous iteration:** `.cursor/skills/aether-autonomous-iterate/SKILL.md`, `.cursor/plans/aether_autonomous_queue.plan.md` — pause via `.cursor/PAUSE_AUTONOMOUS`
+
+## Architecture
+
+- **Runtime** (`crates/aether_*`, `aether_player`): simulation, render, apply patches. Bevy is substrate.
+- **Content plane** (`aether_plane`): canonical store, candidates, publish, SSE, generation workers.
+- **Studio** (`studio/`): review and publish UI.
+
+Games are `GamePackage` JSON — not Rust forks. Live changes use typed patches (`aether_patch`).
+
+## Scope discipline
+
+- Prefer extending package format, patch ops, and plane APIs over one-off game code.
+- 2D / top-down until spatial work in the **near-term plan** ships (`upsert_room` first). No full 3D or MMO unless explicitly requested.
+- AI output must go through validation; no bypass of candidate → publish.
+- Only `aether_player` opens a game window; `aether_plane` is a server process.
+
+## Docs
+
+Update `docs/` when changing package format, patch protocol, or plane HTTP API.

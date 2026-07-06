@@ -1,0 +1,45 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/aether_core",
+    "crates/aether_ecs",
+    "crates/aether_package",
+    "crates/aether_sim",
+    "crates/aether_render",
+    "crates/aether_patch",
+    "crates/aether_script",
+    "crates/aether_player",
+    "crates/aether_plane",
+    "tools/aether_cli",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/your-org/aether-engine"
+
+[workspace.dependencies]
+aether_core = { path = "crates/aether_core" }
+aether_ecs = { path = "crates/aether_ecs" }
+aether_package = { path = "crates/aether_package" }
+aether_sim = { path = "crates/aether_sim" }
+aether_render = { path = "crates/aether_render" }
+aether_patch = { path = "crates/aether_patch" }
+aether_script = { path = "crates/aether_script" }
+aether_plane = { path = "crates/aether_plane" }
+axum = { version = "0.8", features = ["json"] }
+tokio = { version = "1", features = ["full"] }
+tower-http = { version = "0.6", features = ["cors", "fs", "trace"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+async-stream = "0.3"
+futures = "0.3"
+reqwest = { version = "0.12", features = ["blocking", "json"] }
+bevy = { version = "0.15", default-features = true }
+notify = "7"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+anyhow = "1"
+dotenvy = "0.15"

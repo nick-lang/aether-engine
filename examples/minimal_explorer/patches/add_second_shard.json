@@ -1,0 +1,18 @@
+{
+  "patch_id": "add_second_shard",
+  "base_version": 1,
+  "ops": [
+    {
+      "op": "upsert_entity",
+      "scene": "main",
+      "entity": {
+        "id": "grove_shard_north",
+        "scene": "main",
+        "components": {
+          "transform": { "x": 188, "y": 0 },
+          "collectible": { "id": "grove_shard_north" }
+        }
+      }
+    }
+  ]
+}

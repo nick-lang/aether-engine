@@ -1,0 +1,9 @@
+[package]
+name = "aether_script"
+description = "Sandboxed scripting for mod-safe logic (Phase 2+)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+aether_core = { workspace = true }

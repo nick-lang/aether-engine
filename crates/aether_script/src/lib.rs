@@ -1,0 +1,1 @@
+//! Scripting host placeholder.

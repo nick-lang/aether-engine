@@ -1,0 +1,13 @@
+/target/
+/data/plane/
+**/*.rs.bk
+Cargo.lock
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+.env
+.env.*
+!.env.example

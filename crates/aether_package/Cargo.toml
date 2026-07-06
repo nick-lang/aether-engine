@@ -1,0 +1,12 @@
+[package]
+name = "aether_package"
+description = "GamePackage schema, load, and validation"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+aether_core = { workspace = true }
+aether_patch = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }

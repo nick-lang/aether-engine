@@ -1,0 +1,23 @@
+[package]
+name = "aether_player"
+description = "Aether Engine player binary"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "aether_player"
+path = "src/main.rs"
+
+[dependencies]
+aether_core = { workspace = true }
+aether_ecs = { workspace = true }
+aether_package = { workspace = true }
+aether_patch = { workspace = true }
+aether_render = { workspace = true }
+aether_sim = { workspace = true }
+bevy = { workspace = true }
+notify = { workspace = true }
+reqwest = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
